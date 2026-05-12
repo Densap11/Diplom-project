@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Внеучебная активность ДГТУ</title>
+    <link rel="stylesheet" href="./styles.css?v=20260511-2" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand__mark">У</div>
+          <div>
+            <strong>Внеучебная активность ДГТУ</strong>
+            <p>Университетская доска мероприятий</p>
+          </div>
+        </div>
+
+        <nav class="topbar__nav">
+          <button class="nav-link is-active" data-view="home">Главная</button>
+          <button class="nav-link hidden" data-view="profile" id="profile-nav">Профиль</button>
+          <button class="nav-link hidden" data-view="create" id="create-nav">Создать событие</button>
+          <button class="nav-link hidden" data-view="admin" id="admin-nav">Админ панель</button>
+        </nav>
+
+        <div class="topbar__actions">
+          <button class="button button--ghost" data-view="login" id="login-nav">Вход</button>
+          <button class="button button--primary" data-view="register" id="register-nav">Регистрация</button>
+          <button class="button button--ghost user-pill hidden" data-view="profile" id="user-pill">Профиль</button>
+          <button class="button button--ghost hidden" id="logout-button">Выйти</button>
+        </div>
+      </header>
+
+      <main class="page-shell">
+        <section class="screen screen--active" id="screen-home" data-screen="home">
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Доска событий</p>
+                <h2>Актуальные мероприятия</h2>
+              </div>
+              <button id="refresh-events" class="button button--ghost">Обновить</button>
+            </div>
+
+            <div class="guest-banner" id="guest-banner">
+              Вы можете смотреть мероприятия без входа, но запись доступна только после авторизации.
+            </div>
+
+            <div class="filters-row">
+              <label>
+                <span>Поиск</span>
+                <input id="search-input" type="text" placeholder="Введите название события" />
+              </label>
+              <label>
+                <span>Категория</span>
+                <select id="category-filter">
+                  <option value="">Все категории</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="events-grid" class="events-grid"></div>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-login" data-screen="login">
+          <section class="auth-screen">
+            <form id="login-form" class="panel auth-card">
+              <div class="section-header">
+                <div>
+                  <p class="section-label">Вход</p>
+                  <h2>Авторизация</h2>
+                </div>
+              </div>
+              <label>
+                <span>Email</span>
+                <input type="email" name="email" placeholder="student@campus-demo.ru" required />
+              </label>
+              <label>
+                <span>Пароль</span>
+                <input type="password" name="password" placeholder="Введите пароль" required />
+              </label>
+              <button type="submit" class="button button--primary">Войти</button>
+            </form>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-register" data-screen="register">
+          <section class="auth-screen">
+            <form id="register-form" class="panel auth-card">
+              <div class="section-header">
+                <div>
+                  <p class="section-label">Регистрация</p>
+                  <h2>Создание аккаунта</h2>
+                </div>
+              </div>
+              <div class="form-grid">
+                <label>
+                  <span>ФИО</span>
+                  <input type="text" name="full_name" required />
+                </label>
+                <label>
+                  <span>Email</span>
+                  <input type="email" name="email" required />
+                </label>
+                <label>
+                  <span>Пароль</span>
+                  <input type="password" name="password" required />
+                </label>
+                <label>
+                  <span>Роль</span>
+                  <select name="role">
+                    <option value="student">Студент</option>
+                    <option value="organizer">Организатор</option>
+                    <option value="admin">Администратор</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Факультет</span>
+                  <input type="text" name="faculty" />
+                </label>
+                <label>
+                  <span>Группа</span>
+                  <input type="text" name="study_group" />
+                </label>
+                <label class="form-grid__full">
+                  <span>Телефон</span>
+                  <input type="text" name="phone" />
+                </label>
+              </div>
+              <button type="submit" class="button button--primary">Зарегистрироваться</button>
+            </form>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-profile" data-screen="profile">
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Профиль</p>
+                <h2 id="profile-title">Личный кабинет</h2>
+              </div>
+              <button id="refresh-profile-data" class="button button--ghost">Обновить данные</button>
+            </div>
+
+            <div class="profile-grid">
+              <div class="subpanel">
+                <h3>Мои записи</h3>
+                <div id="my-registrations" class="list-block"></div>
+              </div>
+              <div class="subpanel">
+                <h3>Мои события</h3>
+                <div id="my-events" class="list-block"></div>
+              </div>
+            </div>
+
+            <div class="subpanel hidden" id="participants-panel">
+              <div class="section-header">
+                <div>
+                  <p class="section-label">Участники</p>
+                  <h3 id="participants-title">Список записавшихся</h3>
+                </div>
+                <button id="participants-close" class="button button--ghost">Скрыть</button>
+              </div>
+              <div id="participants-list" class="list-block"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-create" data-screen="create">
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Организатор</p>
+                <h2 id="event-form-title">Создание события</h2>
+              </div>
+            </div>
+
+            <form id="event-form" class="form-grid form-grid--wide">
+              <label class="form-grid__full">
+                <span>Название</span>
+                <input type="text" name="title" required />
+              </label>
+              <label class="form-grid__full">
+                <span>Краткое описание</span>
+                <textarea name="short_description" rows="3" required></textarea>
+              </label>
+              <label class="form-grid__full">
+                <span>Полное описание</span>
+                <textarea name="full_description" rows="5" required></textarea>
+              </label>
+              <label>
+                <span>Дата и время</span>
+                <input type="datetime-local" name="event_date" required />
+              </label>
+              <label>
+                <span>Место проведения</span>
+                <input type="text" name="location" required />
+              </label>
+              <label>
+                <span>Контакты</span>
+                <input type="text" name="contacts" required />
+              </label>
+              <label>
+                <span>Формат</span>
+                <select name="format">
+                  <option value="offline">Офлайн</option>
+                  <option value="online">Онлайн</option>
+                  <option value="mixed">Смешанный</option>
+                </select>
+              </label>
+              <label>
+                <span>Категория</span>
+                <select id="event-category" name="category_id" required></select>
+              </label>
+              <label>
+                <span>Обложка</span>
+                <input type="file" name="image" accept="image/*" />
+              </label>
+              <label>
+                <span>Статус</span>
+                <select name="status">
+                  <option value="draft">Черновик</option>
+                  <option value="published">Опубликовано</option>
+                </select>
+              </label>
+              <label class="checkbox-row form-grid__full">
+                <input id="unlimited-checkbox" type="checkbox" name="is_unlimited" />
+                <span>Событие без ограничения мест</span>
+              </label>
+              <label id="limit-field">
+                <span>Лимит участников</span>
+                <input type="number" name="max_participants" min="1" value="20" />
+              </label>
+              <div class="form-grid__full">
+                <button type="submit" class="button button--primary">Сохранить событие</button>
+                <button type="button" class="button button--ghost hidden" id="cancel-edit-button">Отменить редактирование</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel hidden" id="admin-panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Администратор</p>
+                <h2>Категории</h2>
+              </div>
+            </div>
+
+            <form id="category-form" class="category-row">
+              <input type="text" name="name" placeholder="Название категории" required />
+              <button type="submit" class="button button--ghost">Добавить категорию</button>
+            </form>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-admin" data-screen="admin">
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Администратор</p>
+                <h2>Пользователи и роли</h2>
+              </div>
+              <button id="refresh-users" class="button button--ghost">Обновить список</button>
+            </div>
+            <div class="admin-users-toolbar">
+              <label>
+                <span>Поиск пользователя</span>
+                <input id="admin-user-search" type="text" placeholder="ФИО или email" />
+              </label>
+              <label>
+                <span>Роль</span>
+                <select id="admin-role-filter">
+                  <option value="">Все роли</option>
+                  <option value="student">Студенты</option>
+                  <option value="organizer">Организаторы</option>
+                  <option value="admin">Администраторы</option>
+                </select>
+              </label>
+            </div>
+            <div id="admin-users" class="admin-users"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-header">
+              <div>
+                <p class="section-label">Администратор</p>
+                <h2>Все события</h2>
+              </div>
+              <button id="refresh-manage-events" class="button button--ghost">Обновить события</button>
+            </div>
+            <div id="admin-events" class="list-block"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <template id="event-card-template">
+      <article class="event-card">
+        <div class="event-card__cover-wrap">
+          <img class="event-card__cover hidden" alt="Обложка события" />
+        </div>
+        <div class="event-card__top">
+          <span class="badge badge--soft event-card__category"></span>
+          <span class="badge event-card__status"></span>
+        </div>
+        <h3 class="event-card__title"></h3>
+        <p class="event-card__summary"></p>
+        <dl class="event-card__meta">
+          <div>
+            <dt>Дата</dt>
+            <dd class="event-card__date"></dd>
+          </div>
+          <div>
+            <dt>Место</dt>
+            <dd class="event-card__location"></dd>
+          </div>
+          <div>
+            <dt>Контакты</dt>
+            <dd class="event-card__contacts"></dd>
+          </div>
+          <div>
+            <dt>Места</dt>
+            <dd class="event-card__capacity"></dd>
+          </div>
+        </dl>
+        <div class="event-card__actions">
+          <button class="button button--primary event-register">Записаться</button>
+          <button class="button button--ghost event-cancel">Отменить запись</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js?v=20260511-2"></script>
+  </body>
+</html>

@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Описание сервиса внеучебной активности</title>
+    <style>
+      :root {
+        --bg: #f3f7fc;
+        --surface: #ffffff;
+        --surface-soft: #eef4fb;
+        --text: #17324d;
+        --muted: #5a6e84;
+        --line: #cfe0f2;
+        --accent: #2463a6;
+        --accent-soft: #dcecff;
+        --good: #1f7a4f;
+        --radius: 20px;
+        --shadow: 0 10px 30px rgba(28, 73, 123, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, #dcecff 0, transparent 28%),
+          linear-gradient(180deg, #f7fbff 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .page {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      .hero,
+      .card {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 32px;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 1.08;
+      }
+
+      .lead {
+        margin: 18px 0 0;
+        max-width: 820px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.65;
+      }
+
+      .quick-grid,
+      .grid-2,
+      .grid-3 {
+        display: grid;
+        gap: 18px;
+      }
+
+      .quick-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        margin-top: 24px;
+      }
+
+      .quick-item {
+        padding: 18px;
+        border-radius: 18px;
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+      }
+
+      .quick-item strong {
+        display: block;
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .section {
+        margin-top: 18px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .section-title {
+        margin-bottom: 14px;
+        font-size: 28px;
+      }
+
+      .section-text,
+      li,
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      ul,
+      ol {
+        margin: 12px 0 0;
+        padding-left: 22px;
+      }
+
+      .role {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface-soft);
+      }
+
+      .role h3 {
+        margin-bottom: 8px;
+        font-size: 20px;
+      }
+
+      .stack-table,
+      .file-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      .stack-table th,
+      .stack-table td,
+      .file-table th,
+      .file-table td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      .stack-table th,
+      .file-table th {
+        color: var(--text);
+        background: #f8fbff;
+        font-weight: 700;
+      }
+
+      code,
+      .path {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 14px;
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: #edf3fa;
+        color: #1c436b;
+      }
+
+      .flow {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .step {
+        padding: 16px 18px;
+        border-left: 4px solid var(--accent);
+        background: #f8fbff;
+        border-radius: 14px;
+      }
+
+      .good {
+        color: var(--good);
+        font-weight: 600;
+      }
+
+      .footer-note {
+        margin-top: 24px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #eff8f2;
+        border: 1px solid #cfe9d8;
+      }
+
+      @media (max-width: 720px) {
+        .hero,
+        .card {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <span class="eyebrow">Пояснение проекта простыми словами</span>
+        <h1>Как работает сервис агрегации внеучебной деятельности университета</h1>
+        <p class="lead">
+          Этот документ нужен как понятная шпаргалка для защиты и отчета. Он объясняет, что делает
+          сервис, какие роли в нем есть, как двигаются данные, какой стек используется и за что
+          отвечают основные файлы проекта. Текст написан без сложных терминов, чтобы им можно было
+          пользоваться даже без глубокого опыта в разработке.
+        </p>
+
+        <div class="quick-grid">
+          <div class="quick-item">
+            <strong>FastAPI</strong>
+            Backend-сервис с REST API и Swagger-документацией.
+          </div>
+          <div class="quick-item">
+            <strong>PostgreSQL</strong>
+            База данных для пользователей, событий, категорий и записей.
+          </div>
+          <div class="quick-item">
+            <strong>HTML/CSS/JS</strong>
+            Frontend-интерфейс, который открывается в браузере.
+          </div>
+          <div class="quick-item">
+            <strong>Docker</strong>
+            Упрощает запуск проекта перед демонстрацией.
+          </div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">1. Что это за сервис</h2>
+        <p class="section-text">
+          Сервис объединяет всю внеучебную активность университета в одном месте. Организаторы
+          публикуют мероприятия: набор в клуб, секцию, концерт, подкаст, волонтерский проект,
+          мастер-класс и так далее. Студенты заходят на общую доску, читают описание события,
+          смотрят дату, место, контакты, обложку и при желании записываются.
+        </p>
+        <p class="section-text">
+          Главная идея проекта: убрать хаос из разных чатов и объявлений и сделать один понятный
+          цифровой сервис, где студенты быстро находят активности, а организаторы получают удобный
+          инструмент публикации и учета участников.
+        </p>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">2. Кто пользуется системой</h2>
+        <div class="grid-3">
+          <div class="role">
+            <h3>Студент</h3>
+            <p>Смотрит общую ленту событий, фильтрует мероприятия, записывается и видит свои записи в профиле.</p>
+          </div>
+          <div class="role">
+            <h3>Организатор</h3>
+            <p>Создает и редактирует события, добавляет обложку, публикует или архивирует мероприятие и смотрит участников.</p>
+          </div>
+          <div class="role">
+            <h3>Администратор</h3>
+            <p>Управляет пользователями и ролями, видит все события в системе и может контролировать их статусы.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">3. Как пользователь видит сервис</h2>
+        <div class="flow">
+          <div class="step">
+            <strong>Шаг 1. Главная страница.</strong>
+            Даже без входа пользователь видит список актуальных мероприятий. Это удобно для первого знакомства с сервисом.
+          </div>
+          <div class="step">
+            <strong>Шаг 2. Вход или регистрация.</strong>
+            Чтобы записываться на мероприятия или создавать свои события, нужно авторизоваться.
+          </div>
+          <div class="step">
+            <strong>Шаг 3. Работа по роли.</strong>
+            Студент получает доступ к профилю и записи, организатор к созданию события, администратор к панели управления.
+          </div>
+          <div class="step">
+            <strong>Шаг 4. Обмен данными с backend.</strong>
+            Все действия интерфейса отправляют запросы на API FastAPI, а backend уже читает или меняет данные в PostgreSQL.
+          </div>
+        </div>
+      </section>
+
+      <section class="section grid-2">
+        <article class="card">
+          <h2 class="section-title">4. Что умеет студент</h2>
+          <ol>
+            <li>Открыть главную страницу и посмотреть список мероприятий.</li>
+            <li>Воспользоваться поиском и фильтром по категориям.</li>
+            <li>Открыть карточку события и узнать, что это за мероприятие.</li>
+            <li>Войти в аккаунт и нажать кнопку записи.</li>
+            <li>Перейти в профиль и увидеть список своих записей.</li>
+            <li>Отменить запись, если событие больше не интересно.</li>
+          </ol>
+        </article>
+
+        <article class="card">
+          <h2 class="section-title">5. Что умеет организатор</h2>
+          <ol>
+            <li>Создать новое событие через специальную форму.</li>
+            <li>Заполнить название, краткое и полное описание, дату, место, контакты и формат.</li>
+            <li>Выбрать категорию и при необходимости лимит участников.</li>
+            <li>Загрузить изображение-обложку события.</li>
+            <li>Сохранить событие как черновик или сразу опубликовать.</li>
+            <li>Редактировать, архивировать или удалять свои события.</li>
+            <li>Открыть список участников и увидеть ФИО, телефон и email записавшихся.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">6. Что умеет администратор</h2>
+        <ol>
+          <li>Видеть список всех пользователей системы.</li>
+          <li>Менять роли пользователей: студент, организатор, администратор.</li>
+          <li>Видеть все мероприятия в системе, а не только свои.</li>
+          <li>Управлять событиями: редактировать, публиковать, отправлять в архив, удалять.</li>
+          <li>Использовать сервис как человек, который контролирует корректность работы всей платформы.</li>
+        </ol>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">7. Как работает backend</h2>
+        <p class="section-text">
+          Backend написан на <code>FastAPI</code>. Это серверная часть проекта. Она принимает запросы
+          от браузера, проверяет данные, работает с базой данных и возвращает результат обратно.
+        </p>
+        <div class="flow">
+          <div class="step">
+            <strong>Пример.</strong>
+            Студент нажимает кнопку "Записаться". Frontend отправляет запрос на backend. Backend проверяет:
+            существует ли событие, опубликовано ли оно, есть ли еще места и не записан ли студент уже раньше.
+            Если все в порядке, в базе создается запись.
+          </div>
+          <div class="step">
+            <strong>Еще пример.</strong>
+            Организатор создает событие. Backend получает форму, валидирует поля, сохраняет изображение
+            обложки и записывает данные о событии в таблицу <code>events</code>.
+          </div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">8. Как работает frontend</h2>
+        <p class="section-text">
+          Frontend реализован как браузерный интерфейс на обычных <code>HTML</code>, <code>CSS</code> и
+          <code>JavaScript</code>. Он не хранит данные сам по себе, а только показывает информацию,
+          которую получает от backend.
+        </p>
+        <ol>
+          <li><code>index.html</code> описывает структуру экранов: главная, вход, регистрация, профиль, создание события, админка.</li>
+          <li><code>styles.css</code> отвечает за внешний вид интерфейса: цвета, отступы, блоки, адаптивность под разные экраны.</li>
+          <li><code>app.js</code> содержит логику интерфейса: отправку запросов на API, переключение экранов, рендер карточек событий и работу кнопок.</li>
+        </ol>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">9. Используемый стек технологий</h2>
+        <table class="stack-table">
+          <thead>
+            <tr>
+              <th>Технология</th>
+              <th>Где используется</th>
+              <th>Зачем нужна</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FastAPI</td>
+              <td>Backend</td>
+              <td>Создание REST API, обработка запросов, генерация Swagger-документации.</td>
+            </tr>
+            <tr>
+              <td>SQLAlchemy</td>
+              <td>Backend</td>
+              <td>Работа с PostgreSQL через Python-модели.</td>
+            </tr>
+            <tr>
+              <td>Pydantic</td>
+              <td>Backend</td>
+              <td>Проверка входных данных и валидация схем запросов и ответов.</td>
+            </tr>
+            <tr>
+              <td>PostgreSQL</td>
+              <td>База данных</td>
+              <td>Хранение пользователей, событий, категорий и записей.</td>
+            </tr>
+            <tr>
+              <td>Alembic</td>
+              <td>Backend</td>
+              <td>Миграции базы данных, чтобы структура таблиц создавалась и обновлялась правильно.</td>
+            </tr>
+            <tr>
+              <td>JWT</td>
+              <td>Backend + Frontend</td>
+              <td>Авторизация пользователя через токен после входа в систему.</td>
+            </tr>
+            <tr>
+              <td>HTML/CSS/JavaScript</td>
+              <td>Frontend</td>
+              <td>Формирование пользовательского интерфейса.</td>
+            </tr>
+            <tr>
+              <td>Nginx</td>
+              <td>Frontend-контейнер</td>
+              <td>Раздача статических файлов интерфейса.</td>
+            </tr>
+            <tr>
+              <td>Docker / Docker Compose</td>
+              <td>Развертывание</td>
+              <td>Быстрый запуск сервиса перед демонстрацией.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">10. Основные сущности базы данных</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Пользователь</h3>
+            <p>Хранит ФИО, email, пароль в зашифрованном виде, факультет, группу, телефон и роль.</p>
+
+            <h3>Событие</h3>
+            <p>Содержит название, описание, дату, место, контакты, формат, статус, лимит участников и обложку.</p>
+          </div>
+          <div>
+            <h3>Категория</h3>
+            <p>Нужна для группировки мероприятий, например: концерты, клубы, секции, волонтерство.</p>
+
+            <h3>Запись на событие</h3>
+            <p>Связывает конкретного студента и конкретное событие. Позволяет понять, кто записался.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">11. Логика работы по файлам</h2>
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Файл</th>
+              <th>Назначение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="path">backend/app/main.py</span></td>
+              <td>Точка запуска backend. Создает приложение FastAPI, подключает роуты, CORS и папку с изображениями.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/core/config.py</span></td>
+              <td>Хранит настройки проекта: имя сервиса, путь API, параметры PostgreSQL, токены и папку загрузок.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/models/*.py</span></td>
+              <td>Модели таблиц базы данных: пользователи, события, категории, регистрации.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/schemas/*.py</span></td>
+              <td>Схемы Pydantic. Проверяют, какие данные можно принять и в каком виде отдавать ответы.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/api/v1/auth.py</span></td>
+              <td>Регистрация, вход и получение данных текущего пользователя.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/api/v1/events.py</span></td>
+              <td>Получение событий, создание, редактирование, изменение статуса, удаление, загрузка обложек.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/api/v1/registrations.py</span></td>
+              <td>Запись на событие, отмена записи и просмотр участников.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/api/v1/users.py</span></td>
+              <td>Профиль пользователя, его события, его записи, список пользователей и смена ролей.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/services/*.py</span></td>
+              <td>Бизнес-логика. Здесь принимаются решения: можно ли записаться, можно ли удалить событие, есть ли права доступа.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/utils/security.py</span></td>
+              <td>Шифрование паролей и работа с JWT-токенами.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/app/utils/files.py</span></td>
+              <td>Сохранение загруженных изображений событий.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/alembic/versions/*.py</span></td>
+              <td>Миграции базы данных. Создают структуру таблиц и новые поля.</td>
+            </tr>
+            <tr>
+              <td><span class="path">frontend/index.html</span></td>
+              <td>Главный HTML интерфейса. В нем описаны экраны и шаблон карточки события.</td>
+            </tr>
+            <tr>
+              <td><span class="path">frontend/styles.css</span></td>
+              <td>Внешний вид интерфейса: сетки, кнопки, формы, карточки и адаптация под мобильные устройства.</td>
+            </tr>
+            <tr>
+              <td><span class="path">frontend/app.js</span></td>
+              <td>Клиентская логика: отправка запросов на API, отрисовка событий, переключение экранов, работа роли пользователя.</td>
+            </tr>
+            <tr>
+              <td><span class="path">backend/docker-compose.yml</span></td>
+              <td>Файл запуска проекта через Docker Compose.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">12. Как проходит типичный запрос внутри системы</h2>
+        <div class="flow">
+          <div class="step">
+            <strong>1.</strong> Пользователь нажимает кнопку во frontend, например "Войти" или "Записаться".
+          </div>
+          <div class="step">
+            <strong>2.</strong> Файл <code>frontend/app.js</code> отправляет HTTP-запрос на backend по адресу <code>/api/v1/...</code>.
+          </div>
+          <div class="step">
+            <strong>3.</strong> FastAPI принимает запрос в одном из роутов, например в <code>auth.py</code>, <code>events.py</code> или <code>registrations.py</code>.
+          </div>
+          <div class="step">
+            <strong>4.</strong> Backend проверяет права доступа, валидирует данные и вызывает нужную бизнес-логику из папки <code>services</code>.
+          </div>
+          <div class="step">
+            <strong>5.</strong> Сервис работает с PostgreSQL через SQLAlchemy-модели и получает или изменяет данные.
+          </div>
+          <div class="step">
+            <strong>6.</strong> Backend отправляет готовый JSON-ответ обратно во frontend.
+          </div>
+          <div class="step">
+            <strong>7.</strong> Frontend обновляет экран: показывает событие, уведомление, список участников или изменения профиля.
+          </div>
+        </div>
+      </section>
+
+      <section class="section grid-2">
+        <article class="card">
+          <h2 class="section-title">13. Что важно сказать в отчете</h2>
+          <ol>
+            <li>Проект решает проблему разрозненности информации о внеучебных мероприятиях.</li>
+            <li>Сервис поддерживает несколько ролей и разграничение прав доступа.</li>
+            <li>Используется клиент-серверная архитектура.</li>
+            <li>Backend и frontend разделены, поэтому систему можно дальше масштабировать.</li>
+            <li>Применяется PostgreSQL как надежная реляционная база данных.</li>
+            <li>Для удобства демонстрации и развертывания используется Docker.</li>
+          </ol>
+        </article>
+
+        <article class="card">
+          <h2 class="section-title">14. Что можно назвать преимуществами проекта</h2>
+          <ol>
+            <li>Одна точка входа для всех университетских мероприятий.</li>
+            <li>Понятные роли: студент, организатор, администратор.</li>
+            <li>Поддержка публикации событий с изображением и лимитом мест.</li>
+            <li>Просмотр участников организатором.</li>
+            <li>Русифицированная Swagger-документация API.</li>
+            <li>Работа сервиса и на компьютере, и на телефоне по локальной сети.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="section card">
+        <h2 class="section-title">15. Как кратко объяснить работу проекта руководителю</h2>
+        <p class="section-text">
+          Сервис состоит из двух частей. Первая часть — backend на FastAPI, который хранит правила
+          работы системы и общается с базой PostgreSQL. Вторая часть — frontend, который показывает
+          пользователю интерфейс в браузере. Когда пользователь что-то делает, frontend отправляет
+          запрос на backend, backend проверяет данные, работает с базой и возвращает результат.
+          Благодаря этому организаторы могут публиковать мероприятия, студенты записываться на них,
+          а администратор управлять пользователями и событиями.
+        </p>
+      </section>
+
+      <section class="footer-note">
+        <strong class="good">Готово для использования в отчете.</strong>
+        Этот файл можно открывать как обычную веб-страницу и использовать как основу для разделов:
+        "Назначение системы", "Архитектура", "Выбор технологий", "Описание модулей", "Сценарии работы пользователя" и "Описание базы данных".
+      </section>
+    </main>
+  </body>
+</html>
