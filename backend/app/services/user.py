@@ -5,7 +5,9 @@ from app.models.event import Event
 from app.models.event_comment import EventComment
 from app.models.event_registration import EventRegistration
 from app.models.event_tag_link import EventTagLink
+from app.models.audit_log import AuditLog
 from app.models.user import User, UserRole
+from app.services.audit import create_audit_log
 from app.services.role import get_role_by_name
 
 
@@ -31,13 +33,21 @@ def list_users(db: Session) -> list[User]:
     return list(db.scalars(query).all())
 
 
-def update_user_role(db: Session, user_id: int, role: UserRole) -> User:
+def update_user_role(db: Session, user_id: int, role: UserRole, current_user: User) -> User:
     user = db.get(User, user_id)
     if user is None:
         raise ValueError("Пользователь не найден")
 
     role_record = get_role_by_name(db, role)
     user.role_id = role_record.id
+    create_audit_log(
+        db,
+        action="user.role.update",
+        entity_type="user",
+        entity_id=user.id,
+        actor=current_user,
+        details=f"Назначена роль: {role.value}",
+    )
     db.commit()
     db.refresh(user)
     return user
@@ -49,6 +59,15 @@ def delete_user(db: Session, user_id: int, current_user: User) -> None:
         raise ValueError("Пользователь не найден")
     if user.id == current_user.id:
         raise ValueError("Нельзя удалить собственный аккаунт")
+
+    create_audit_log(
+        db,
+        action="user.delete",
+        entity_type="user",
+        entity_id=user.id,
+        actor=current_user,
+        details=f"Удален пользователь: {user.email}",
+    )
 
     owned_event_ids = list(
         db.scalars(select(Event.id).where(Event.organizer_id == user.id)).all()
@@ -62,5 +81,6 @@ def delete_user(db: Session, user_id: int, current_user: User) -> None:
 
     db.execute(delete(EventComment).where(EventComment.author_id == user.id))
     db.execute(delete(EventRegistration).where(EventRegistration.student_id == user.id))
+    db.query(AuditLog).filter(AuditLog.actor_id == user.id).update({"actor_id": None})
     db.delete(user)
     db.commit()

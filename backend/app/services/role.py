@@ -5,6 +5,7 @@ from app.models.permission import Permission
 from app.models.role import Role
 from app.models.role_permission import RolePermission
 from app.models.user import UserRole
+from app.models.user import User
 
 
 DEFAULT_ROLES = {
@@ -22,6 +23,7 @@ DEFAULT_PERMISSIONS = {
     "users:manage": "Управление пользователями и ролями",
     "categories:manage": "Управление категориями",
     "comments:create": "Создание комментариев",
+    "audit:read": "Просмотр журнала административных действий",
 }
 
 ROLE_PERMISSION_CODES = {
@@ -75,3 +77,18 @@ def get_role_by_name(db: Session, role: UserRole) -> Role:
 def list_roles(db: Session) -> list[Role]:
     ensure_default_roles(db)
     return list(db.scalars(select(Role).order_by(Role.id)).all())
+
+
+def user_has_permissions(db: Session, user: User, permission_codes: tuple[str, ...]) -> bool:
+    if not permission_codes:
+        return True
+
+    ensure_default_roles(db)
+    granted_permissions = set(
+        db.scalars(
+            select(Permission.code)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .where(RolePermission.role_id == user.role_id)
+        ).all()
+    )
+    return set(permission_codes).issubset(granted_permissions)

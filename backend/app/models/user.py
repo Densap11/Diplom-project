@@ -32,6 +32,8 @@ class User(Base):
     organized_events = relationship("Event", back_populates="organizer")
     registrations = relationship("EventRegistration", back_populates="student")
     comments = relationship("EventComment", back_populates="author")
+    audit_logs = relationship("AuditLog", back_populates="actor")
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
 
     @property
     def role(self) -> UserRole:

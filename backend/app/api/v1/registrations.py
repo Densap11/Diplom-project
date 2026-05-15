@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import get_current_user, require_permissions
+from app.models.user import User
 from app.schemas.registration import EventParticipantRead, EventRegistrationRead
 from app.services.registration import (
     cancel_registration,
@@ -24,7 +24,7 @@ router = APIRouter()
 def register_for_event_endpoint(
     event_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.student, UserRole.admin)),
+    current_user: User = Depends(require_permissions("registrations:create")),
 ) -> EventRegistrationRead:
     try:
         registration = register_for_event(db=db, event_id=event_id, student=current_user)
@@ -42,7 +42,7 @@ def register_for_event_endpoint(
 def cancel_registration_endpoint(
     event_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.student, UserRole.admin)),
+    current_user: User = Depends(require_permissions("registrations:create")),
 ) -> Response:
     try:
         cancel_registration(db=db, event_id=event_id, student=current_user)

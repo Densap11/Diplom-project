@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.audit_logs import router as audit_logs_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.categories import router as categories_router
 from app.api.v1.event_comments import router as event_comments_router
@@ -12,6 +13,7 @@ from app.api.v1.users import router as users_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["auth"])
+router.include_router(audit_logs_router, prefix="/audit-logs", tags=["audit"])
 router.include_router(categories_router, prefix="/categories", tags=["categories"])
 router.include_router(roles_router, prefix="/roles", tags=["roles"])
 router.include_router(event_tags_router, prefix="/events", tags=["event-tags"])

@@ -10,6 +10,7 @@ from app.core.config import settings
 def create_application() -> FastAPI:
     openapi_tags = [
         {"name": "auth", "description": "Аутентификация, регистрация и работа с текущим пользователем."},
+        {"name": "audit", "description": "Журнал административных действий."},
         {"name": "categories", "description": "Категории внеучебных мероприятий."},
         {"name": "roles", "description": "Роли и базовая RBAC-структура доступа."},
         {"name": "events", "description": "Публикация, просмотр и карточки мероприятий."},
@@ -34,7 +35,7 @@ def create_application() -> FastAPI:
     )
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=settings.cors_origin_list,
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],

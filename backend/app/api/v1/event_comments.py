@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import get_current_user, require_permissions
+from app.models.user import User
 from app.schemas.event_comment import EventCommentCreate, EventCommentRead
 from app.services.event_comment import create_event_comment, delete_event_comment, list_event_comments
 
@@ -35,7 +35,7 @@ def create_event_comment_endpoint(
     event_id: int,
     payload: EventCommentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.student, UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("comments:create")),
 ) -> EventCommentRead:
     try:
         comment = create_event_comment(db=db, event_id=event_id, payload=payload, author=current_user)

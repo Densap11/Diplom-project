@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import get_current_user, require_permissions
+from app.models.user import User
 from app.schemas.event import EventRead
 from app.schemas.event_tag import EventTagCreate, EventTagRead
 from app.services.event_tag import attach_tag_to_event, create_event_tag, detach_tag_from_event, list_event_tags
@@ -32,7 +32,7 @@ def read_event_tags(db: Session = Depends(get_db)) -> list[EventTagRead]:
 def create_event_tag_endpoint(
     payload: EventTagCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    _: User = Depends(require_permissions("events:manage-own")),
 ) -> EventTagRead:
     try:
         tag = create_event_tag(db=db, payload=payload)

@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import require_permissions
+from app.models.user import User
+from app.models.event import EventFormat
 from app.schemas.event import EventCreate, EventRead, EventStatusUpdate
 from app.services.event import (
     create_event,
@@ -27,8 +28,26 @@ router = APIRouter()
     summary="Список опубликованных событий",
     description="Возвращает общую доску опубликованных мероприятий.",
 )
-def read_events(db: Session = Depends(get_db)) -> list[EventRead]:
-    events = list_published_events(db)
+def read_events(
+    search: str | None = Query(None, min_length=1),
+    category_id: int | None = Query(None, ge=1),
+    format: EventFormat | None = Query(None),
+    date_from: datetime | None = Query(None),
+    date_to: datetime | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+) -> list[EventRead]:
+    events = list_published_events(
+        db,
+        search=search,
+        category_id=category_id,
+        format_value=format,
+        date_from=date_from,
+        date_to=date_to,
+        limit=limit,
+        offset=offset,
+    )
     return [EventRead.model_validate(event) for event in events]
 
 
@@ -40,7 +59,7 @@ def read_events(db: Session = Depends(get_db)) -> list[EventRead]:
 )
 def read_manageable_events(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("events:manage-own")),
 ) -> list[EventRead]:
     events = get_manageable_events(db=db, current_user=current_user)
     return [EventRead.model_validate(event) for event in events]
@@ -80,7 +99,7 @@ def create_event_endpoint(
     status_value: str = Form(..., alias="status", description="Статус: draft или published"),
     image: UploadFile | None = File(None, description="Обложка события"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("events:create")),
 ) -> EventRead:
     try:
         payload = EventCreate(
@@ -124,7 +143,7 @@ def update_event_endpoint(
     status_value: str = Form(..., alias="status"),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("events:manage-own")),
 ) -> EventRead:
     try:
         payload = EventCreate(
@@ -167,7 +186,7 @@ def update_event_status_endpoint(
     event_id: int,
     payload: EventStatusUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("events:manage-own")),
 ) -> EventRead:
     try:
         event = update_event_status(
@@ -194,7 +213,7 @@ def update_event_status_endpoint(
 def delete_event_endpoint(
     event_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.organizer, UserRole.admin)),
+    current_user: User = Depends(require_permissions("events:manage-own")),
 ) -> None:
     try:
         delete_event(db=db, event_id=event_id, current_user=current_user)

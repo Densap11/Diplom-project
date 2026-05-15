@@ -46,6 +46,12 @@ Thumbs.db
 # Uploads
 uploads/*
 !uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Backups
+backups/
+backend/backups/
 
 # Pytest
 .pytest_cache/

@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     media_prefix: str = "/media"
     upload_dir: str = "uploads"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    max_upload_size_bytes: int = 5 * 1024 * 1024
+    allowed_image_types: str = "image/jpeg,image/png,image/webp"
+    expose_demo_reset_token: bool = False
+    frontend_url: str = "http://localhost:3000"
+    first_admin_email: str | None = None
+    first_admin_password: str | None = None
+    first_admin_full_name: str = "Администратор"
 
     postgres_server: str = Field(default="localhost")
     postgres_port: int = Field(default=5432)
@@ -38,6 +46,14 @@ class Settings(BaseSettings):
             f"{credentials}"
             f"@{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
         )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def allowed_image_type_set(self) -> set[str]:
+        return {item.strip() for item in self.allowed_image_types.split(",") if item.strip()}
 
 
 @lru_cache

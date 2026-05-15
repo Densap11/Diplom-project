@@ -1,6 +1,11 @@
 const apiHost = window.location.hostname || "localhost";
 const apiProtocol = window.location.protocol === "https:" ? "https:" : "http:";
-const API_ROOT = `${apiProtocol}//${apiHost}:8000`;
+const configuredApiRoot = window.__APP_CONFIG__?.API_ROOT;
+const API_ROOT = configuredApiRoot || (
+  window.location.port === "3000"
+    ? `${apiProtocol}//${apiHost}:8000`
+    : window.location.origin
+);
 const API_BASE = `${API_ROOT}/api/v1`;
 
 const state = {
@@ -86,12 +91,26 @@ async function apiFetch(path, options = {}) {
     headers.Authorization = `Bearer ${state.token}`;
   }
 
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch {
+    throw new Error("Сервер недоступен. Проверьте подключение и повторите попытку.");
+  }
+
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
 
   if (!response.ok) {
-    throw new Error(data?.detail || "Произошла ошибка запроса");
+    const detail = Array.isArray(data?.detail)
+      ? data.detail.map((item) => item.msg || item.message || String(item)).join("; ")
+      : data?.detail;
+    throw new Error(detail || `Ошибка запроса: ${response.status}`);
   }
 
   return data;
@@ -478,7 +497,16 @@ async function loadCategories() {
 }
 
 async function loadEvents() {
-  state.events = await apiFetch("/events");
+  const params = new URLSearchParams({ limit: "100" });
+  const searchValue = elements.searchInput.value.trim();
+  if (searchValue) {
+    params.set("search", searchValue);
+  }
+  if (elements.categoryFilter.value) {
+    params.set("category_id", elements.categoryFilter.value);
+  }
+
+  state.events = await apiFetch(`/events?${params.toString()}`);
   renderEvents();
 }
 
@@ -856,8 +884,12 @@ elements.logoutButton.addEventListener("click", handleLogout);
 elements.participantsClose.addEventListener("click", () => {
   elements.participantsPanel.classList.add("hidden");
 });
-elements.searchInput.addEventListener("input", renderEvents);
-elements.categoryFilter.addEventListener("change", renderEvents);
+elements.searchInput.addEventListener("input", () => {
+  loadEvents().catch((error) => showToast(error.message, true));
+});
+elements.categoryFilter.addEventListener("change", () => {
+  loadEvents().catch((error) => showToast(error.message, true));
+});
 elements.adminUserSearch.addEventListener("input", renderAdminUsers);
 elements.adminRoleFilter.addEventListener("change", renderAdminUsers);
 document.getElementById("unlimited-checkbox").addEventListener("change", (event) => {

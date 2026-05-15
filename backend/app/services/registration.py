@@ -7,7 +7,7 @@ from app.models.user import User, UserRole
 
 
 def register_for_event(db: Session, event_id: int, student: User) -> EventRegistration:
-    event = db.get(Event, event_id)
+    event = db.scalar(select(Event).where(Event.id == event_id).with_for_update())
     if event is None or event.status != EventStatus.published:
         raise ValueError("Событие не найдено")
 
@@ -17,14 +17,6 @@ def register_for_event(db: Session, event_id: int, student: User) -> EventRegist
             EventRegistration.student_id == student.id,
         )
     )
-
-    if existing_registration is not None:
-        if existing_registration.status == RegistrationStatus.cancelled:
-            existing_registration.status = RegistrationStatus.confirmed
-            db.commit()
-            db.refresh(existing_registration)
-            return existing_registration
-        raise ValueError("Пользователь уже записан на это событие")
 
     if not event.is_unlimited:
         confirmed_count = db.scalar(
@@ -36,6 +28,14 @@ def register_for_event(db: Session, event_id: int, student: User) -> EventRegist
         if confirmed_count is not None and event.max_participants is not None:
             if confirmed_count >= event.max_participants:
                 raise ValueError("Свободных мест больше нет")
+
+    if existing_registration is not None:
+        if existing_registration.status == RegistrationStatus.cancelled:
+            existing_registration.status = RegistrationStatus.confirmed
+            db.commit()
+            db.refresh(existing_registration)
+            return existing_registration
+        raise ValueError("Пользователь уже записан на это событие")
 
     registration = EventRegistration(
         student_id=student.id,

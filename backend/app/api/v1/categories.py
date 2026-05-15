@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import require_permissions
+from app.models.user import User
 from app.schemas.category import CategoryCreate, CategoryRead
+from app.services.audit import create_audit_log
 from app.services.category import create_category, list_categories
 
 router = APIRouter()
@@ -31,10 +32,19 @@ def read_categories(db: Session = Depends(get_db)) -> list[CategoryRead]:
 def create_category_endpoint(
     payload: CategoryCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.admin)),
+    current_user: User = Depends(require_permissions("categories:manage")),
 ) -> CategoryRead:
     try:
         category = create_category(db=db, payload=payload)
+        create_audit_log(
+            db,
+            action="category.create",
+            entity_type="category",
+            entity_id=category.id,
+            actor=current_user,
+            details=f"Создана категория: {category.name}",
+        )
+        db.commit()
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return CategoryRead.model_validate(category)

@@ -1,4 +1,19 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: activity_service_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-activity_service}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-activity_service}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build:
       context: .
@@ -6,7 +21,12 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_SERVER: host.docker.internal
+      POSTGRES_SERVER: db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+    depends_on:
+      db:
+        condition: service_healthy
     command: >
       sh -c "alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000"
@@ -14,6 +34,11 @@ services:
       - "8000:8000"
     volumes:
       - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   frontend:
     build:
@@ -21,3 +46,31 @@ services:
     container_name: activity_service_frontend
     ports:
       - "3000:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backup:
+    image: postgres:16-alpine
+    profiles:
+      - tools
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      BACKUP_DIR: /backups
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup_postgres.sh:/usr/local/bin/backup_postgres.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/backup_postgres.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

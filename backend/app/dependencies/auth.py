@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.services.auth import decode_access_token
+from app.services.role import user_has_permissions
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_url)
 
@@ -45,3 +46,18 @@ def require_roles(*roles: UserRole) -> Callable[[User], User]:
         return current_user
 
     return role_dependency
+
+
+def require_permissions(*permissions: str) -> Callable[[User], User]:
+    def permission_dependency(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+    ) -> User:
+        if not user_has_permissions(db=db, user=current_user, permission_codes=permissions):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions",
+            )
+        return current_user
+
+    return permission_dependency

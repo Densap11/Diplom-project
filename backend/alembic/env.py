@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.db.base import Base
+import app.models.audit_log  # noqa: F401
 import app.models.category  # noqa: F401
 import app.models.event  # noqa: F401
 import app.models.event_comment  # noqa: F401
@@ -14,6 +15,7 @@ import app.models.event_registration  # noqa: F401
 import app.models.event_tag  # noqa: F401
 import app.models.event_tag_link  # noqa: F401
 import app.models.permission  # noqa: F401
+import app.models.password_reset_token  # noqa: F401
 import app.models.role  # noqa: F401
 import app.models.role_permission  # noqa: F401
 import app.models.user  # noqa: F401

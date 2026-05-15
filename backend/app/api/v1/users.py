@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
-from app.models.user import User, UserRole
+from app.dependencies.auth import get_current_user, require_permissions
+from app.models.user import User
 from app.schemas.event import EventRead
 from app.schemas.registration import EventRegistrationRead
 from app.schemas.user import UserRead, UserRoleUpdate
@@ -48,7 +48,7 @@ def read_my_registrations(
 )
 def read_users(
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.admin)),
+    _: User = Depends(require_permissions("users:manage")),
 ) -> list[UserRead]:
     users = list_users(db=db)
     return [UserRead.model_validate(user) for user in users]
@@ -64,10 +64,10 @@ def update_user_role_endpoint(
     user_id: int,
     payload: UserRoleUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles(UserRole.admin)),
+    current_user: User = Depends(require_permissions("users:manage")),
 ) -> UserRead:
     try:
-        user = update_user_role(db=db, user_id=user_id, role=payload.role)
+        user = update_user_role(db=db, user_id=user_id, role=payload.role, current_user=current_user)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
@@ -83,7 +83,7 @@ def update_user_role_endpoint(
 def delete_user_endpoint(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin)),
+    current_user: User = Depends(require_permissions("users:manage")),
 ) -> Response:
     try:
         delete_user(db=db, user_id=user_id, current_user=current_user)

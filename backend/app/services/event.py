@@ -1,17 +1,40 @@
+from datetime import datetime
+
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
-from app.models.event import Event, EventStatus
+from app.models.event import Event, EventFormat, EventStatus
 from app.models.event_comment import EventComment
 from app.models.event_registration import EventRegistration
 from app.models.event_tag_link import EventTagLink
 from app.models.user import User
 from app.schemas.event import EventCreate
+from app.services.audit import create_audit_log
 
 
-def list_published_events(db: Session) -> list[Event]:
+def list_published_events(
+    db: Session,
+    search: str | None = None,
+    category_id: int | None = None,
+    format_value: EventFormat | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[Event]:
     query = select(Event).where(Event.status == EventStatus.published).order_by(Event.event_date)
+    if search:
+        query = query.where(Event.title.ilike(f"%{search}%"))
+    if category_id is not None:
+        query = query.where(Event.category_id == category_id)
+    if format_value:
+        query = query.where(Event.format == format_value)
+    if date_from is not None:
+        query = query.where(Event.event_date >= date_from)
+    if date_to is not None:
+        query = query.where(Event.event_date <= date_to)
+    query = query.offset(offset).limit(limit)
     return list(db.scalars(query).all())
 
 
@@ -46,6 +69,15 @@ def create_event(
         organizer_id=organizer.id,
     )
     db.add(event)
+    db.flush()
+    create_audit_log(
+        db,
+        action="event.create",
+        entity_type="event",
+        entity_id=event.id,
+        actor=organizer,
+        details=f"Создано событие: {event.title}",
+    )
     db.commit()
     db.refresh(event)
     return event
@@ -94,6 +126,14 @@ def update_event(
     if image_path is not None:
         event.image_path = image_path
 
+    create_audit_log(
+        db,
+        action="event.update",
+        entity_type="event",
+        entity_id=event.id,
+        actor=current_user,
+        details=f"Обновлено событие: {event.title}",
+    )
     db.commit()
     db.refresh(event)
     return event
@@ -107,6 +147,14 @@ def update_event_status(
 ) -> Event:
     event = get_event_for_management(db=db, event_id=event_id, current_user=current_user)
     event.status = status
+    create_audit_log(
+        db,
+        action="event.status",
+        entity_type="event",
+        entity_id=event.id,
+        actor=current_user,
+        details=f"Новый статус: {status.value}",
+    )
     db.commit()
     db.refresh(event)
     return event
@@ -117,5 +165,13 @@ def delete_event(db: Session, event_id: int, current_user: User) -> None:
     db.execute(delete(EventComment).where(EventComment.event_id == event.id))
     db.execute(delete(EventRegistration).where(EventRegistration.event_id == event.id))
     db.execute(delete(EventTagLink).where(EventTagLink.event_id == event.id))
+    create_audit_log(
+        db,
+        action="event.delete",
+        entity_type="event",
+        entity_id=event.id,
+        actor=current_user,
+        details=f"Удалено событие: {event.title}",
+    )
     db.delete(event)
     db.commit()
