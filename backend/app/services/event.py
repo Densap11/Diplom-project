@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.models.category import Category
 from app.models.event import Event, EventStatus
+from app.models.event_comment import EventComment
 from app.models.event_registration import EventRegistration
+from app.models.event_tag_link import EventTagLink
 from app.models.user import User
 from app.schemas.event import EventCreate
 
@@ -112,6 +114,8 @@ def update_event_status(
 
 def delete_event(db: Session, event_id: int, current_user: User) -> None:
     event = get_event_for_management(db=db, event_id=event_id, current_user=current_user)
+    db.execute(delete(EventComment).where(EventComment.event_id == event.id))
     db.execute(delete(EventRegistration).where(EventRegistration.event_id == event.id))
+    db.execute(delete(EventTagLink).where(EventTagLink.event_id == event.id))
     db.delete(event)
     db.commit()

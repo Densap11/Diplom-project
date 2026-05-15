@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.models.event import EventFormat, EventStatus
+from app.schemas.event_tag import EventTagRead
 
 
 class EventBase(BaseModel):
@@ -41,6 +42,7 @@ class EventRead(EventBase):
     id: int = Field(description="Идентификатор события")
     organizer_id: int = Field(description="Идентификатор организатора")
     image_url: str | None = Field(default=None, description="Ссылка на обложку события")
+    tags: list[EventTagRead] = Field(default_factory=list, description="Теги события")
     confirmed_participants: int = Field(default=0, description="Количество подтвержденных участников")
     remaining_places: int | None = Field(default=None, description="Количество оставшихся мест")
     created_at: datetime = Field(description="Дата создания")

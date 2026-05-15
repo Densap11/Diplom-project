@@ -11,7 +11,10 @@ def create_application() -> FastAPI:
     openapi_tags = [
         {"name": "auth", "description": "Аутентификация, регистрация и работа с текущим пользователем."},
         {"name": "categories", "description": "Категории внеучебных мероприятий."},
+        {"name": "roles", "description": "Роли и базовая RBAC-структура доступа."},
         {"name": "events", "description": "Публикация, просмотр и карточки мероприятий."},
+        {"name": "event-tags", "description": "Дополнительная разметка мероприятий тегами."},
+        {"name": "event-comments", "description": "Комментарии пользователей к мероприятиям."},
         {"name": "registrations", "description": "Запись студентов на мероприятия и список участников."},
         {"name": "users", "description": "Данные личного кабинета пользователя."},
         {"name": "health", "description": "Проверка доступности backend-сервиса."},

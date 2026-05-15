@@ -11,7 +11,6 @@ class UserBase(BaseModel):
     faculty: str | None = Field(default=None, max_length=255, title="Факультет")
     study_group: str | None = Field(default=None, max_length=100, title="Группа")
     phone: str | None = Field(default=None, max_length=50, title="Телефон")
-    role: UserRole = Field(default=UserRole.student, title="Роль пользователя")
 
 
 class UserCreate(UserBase):
@@ -27,6 +26,7 @@ class UserRead(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(description="Идентификатор пользователя")
+    role: UserRole = Field(description="Роль пользователя")
     created_at: datetime = Field(description="Дата регистрации")
 
 

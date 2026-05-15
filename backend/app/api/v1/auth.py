@@ -16,7 +16,7 @@ router = APIRouter()
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
     summary="Регистрация пользователя",
-    description="Создает нового пользователя с ролью student, organizer или admin.",
+    description="Создает нового пользователя с ролью student. Остальные роли назначает администратор.",
 )
 def register(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
     try:

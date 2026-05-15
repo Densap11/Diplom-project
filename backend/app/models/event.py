@@ -60,6 +60,8 @@ class Event(Base):
     category = relationship("Category", back_populates="events")
     organizer = relationship("User", back_populates="organized_events")
     registrations = relationship("EventRegistration", back_populates="event")
+    tag_links = relationship("EventTagLink", back_populates="event", cascade="all, delete-orphan")
+    comments = relationship("EventComment", back_populates="event", cascade="all, delete-orphan")
 
     @property
     def image_url(self) -> str | None:
@@ -76,3 +78,7 @@ class Event(Base):
         if self.is_unlimited or self.max_participants is None:
             return None
         return max(self.max_participants - self.confirmed_participants, 0)
+
+    @property
+    def tags(self) -> list:
+        return [link.tag for link in self.tag_links]

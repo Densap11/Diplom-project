@@ -116,6 +116,16 @@ function statusLabel(status) {
   }[status] || status;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[char]));
+}
+
 function formatDate(dateString) {
   return new Intl.DateTimeFormat("ru-RU", {
     dateStyle: "medium",
@@ -190,11 +200,17 @@ function applyHeaderState() {
 
 function populateCategories() {
   elements.categoryFilter.innerHTML = ['<option value="">Все категории</option>']
-    .concat(state.categories.map((category) => `<option value="${category.id}">${category.name}</option>`))
+    .concat(
+      state.categories.map((category) => (
+        `<option value="${category.id}">${escapeHtml(category.name)}</option>`
+      ))
+    )
     .join("");
 
   elements.eventCategory.innerHTML = state.categories.length
-    ? state.categories.map((category) => `<option value="${category.id}">${category.name}</option>`).join("")
+    ? state.categories.map((category) => (
+        `<option value="${category.id}">${escapeHtml(category.name)}</option>`
+      )).join("")
     : '<option value="">Сначала создайте категорию</option>';
 
 }
@@ -279,8 +295,8 @@ function renderProfile() {
         .map(
           (item) => `
             <div class="list-item">
-              <strong>${getEventTitle(item.event_id)}</strong><br />
-              Статус: ${statusLabel(item.status)}<br />
+              <strong>${escapeHtml(getEventTitle(item.event_id))}</strong><br />
+              Статус: ${escapeHtml(statusLabel(item.status))}<br />
               Дата записи: ${formatDate(item.created_at)}
             </div>
           `
@@ -293,10 +309,10 @@ function renderProfile() {
         .map(
           (event) => `
             <div class="list-item">
-              <strong>${event.title}</strong><br />
-              ${getCategoryName(event.category_id)}<br />
+              <strong>${escapeHtml(event.title)}</strong><br />
+              ${escapeHtml(getCategoryName(event.category_id))}<br />
               ${formatDate(event.event_date)}<br />
-              Статус: ${statusLabel(event.status)}
+              Статус: ${escapeHtml(statusLabel(event.status))}
               <div class="list-item__actions">
                 <button class="button button--ghost" data-participants-event="${event.id}">Участники</button>
                 <button class="button button--ghost" data-edit-event="${event.id}">Редактировать</button>
@@ -347,13 +363,13 @@ function renderAdminUsers() {
             <tr>
               <td>
                 <div class="admin-user-main">
-                  <strong>${user.full_name}</strong>
-                  <div class="admin-user-email">${user.email}</div>
+                  <strong>${escapeHtml(user.full_name)}</strong>
+                  <div class="admin-user-email">${escapeHtml(user.email)}</div>
                 </div>
               </td>
-              <td><span class="badge">${roleLabel(user.role)}</span></td>
-              <td>${user.faculty || "Не указан"}</td>
-              <td>${user.study_group || "Не указана"}</td>
+              <td><span class="badge">${escapeHtml(roleLabel(user.role))}</span></td>
+              <td>${escapeHtml(user.faculty || "Не указан")}</td>
+              <td>${escapeHtml(user.study_group || "Не указана")}</td>
               <td>
                 <div class="admin-user-actions">
                   <select data-role-select="${user.id}">
@@ -399,10 +415,10 @@ function renderAdminEvents() {
     .map(
       (event) => `
         <div class="list-item">
-          <strong>${event.title}</strong><br />
-          ${getCategoryName(event.category_id)}<br />
+          <strong>${escapeHtml(event.title)}</strong><br />
+          ${escapeHtml(getCategoryName(event.category_id))}<br />
           ${formatDate(event.event_date)}<br />
-          Статус: ${statusLabel(event.status)}
+          Статус: ${escapeHtml(statusLabel(event.status))}
           <div class="list-item__actions">
             <button class="button button--ghost" data-participants-event="${event.id}">Участники</button>
             <button class="button button--ghost" data-edit-event="${event.id}">Редактировать</button>
@@ -446,9 +462,9 @@ function renderParticipants(title) {
         .map(
           (participant) => `
             <div class="list-item">
-              <strong>${participant.full_name}</strong><br />
-              Телефон: ${participant.phone || "не указан"}<br />
-              Email: ${participant.email}
+              <strong>${escapeHtml(participant.full_name)}</strong><br />
+              Телефон: ${escapeHtml(participant.phone || "не указан")}<br />
+              Email: ${escapeHtml(participant.email)}
             </div>
           `
         )

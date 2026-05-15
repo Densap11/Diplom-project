@@ -7,7 +7,17 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.db.base import Base
-from app.models import category, event, event_registration, user  # noqa: F401
+import app.models.category  # noqa: F401
+import app.models.event  # noqa: F401
+import app.models.event_comment  # noqa: F401
+import app.models.event_registration  # noqa: F401
+import app.models.event_tag  # noqa: F401
+import app.models.event_tag_link  # noqa: F401
+import app.models.permission  # noqa: F401
+import app.models.role  # noqa: F401
+import app.models.role_permission  # noqa: F401
+import app.models.user  # noqa: F401
+import app.models.user_profile  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

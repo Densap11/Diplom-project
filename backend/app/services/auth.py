@@ -5,9 +5,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.user import User
+from app.models.user import User, UserRole
+from app.models.user_profile import UserProfile
 from app.schemas.auth import Token
 from app.schemas.user import UserCreate
+from app.services.role import get_role_by_name
 from app.utils.security import get_password_hash, verify_password
 
 
@@ -16,14 +18,17 @@ def register_user(db: Session, payload: UserCreate) -> User:
     if existing_user is not None:
         raise ValueError("Пользователь с таким email уже существует")
 
+    role = get_role_by_name(db, UserRole.student)
     user = User(
         full_name=payload.full_name,
         email=payload.email,
         hashed_password=get_password_hash(payload.password),
-        faculty=payload.faculty,
-        study_group=payload.study_group,
-        phone=payload.phone,
-        role=payload.role,
+        role_id=role.id,
+        profile=UserProfile(
+            faculty=payload.faculty,
+            study_group=payload.study_group,
+            phone=payload.phone,
+        ),
     )
     db.add(user)
     db.commit()

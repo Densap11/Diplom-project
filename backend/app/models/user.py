@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -20,15 +20,33 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    faculty: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    study_group: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.student, nullable=False)
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=datetime.utcnow,
         nullable=False,
     )
 
+    role_record = relationship("Role", back_populates="users")
+    profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     organized_events = relationship("Event", back_populates="organizer")
     registrations = relationship("EventRegistration", back_populates="student")
+    comments = relationship("EventComment", back_populates="author")
+
+    @property
+    def role(self) -> UserRole:
+        if self.role_record is None:
+            return UserRole.student
+        return UserRole(self.role_record.name)
+
+    @property
+    def faculty(self) -> str | None:
+        return self.profile.faculty if self.profile is not None else None
+
+    @property
+    def study_group(self) -> str | None:
+        return self.profile.study_group if self.profile is not None else None
+
+    @property
+    def phone(self) -> str | None:
+        return self.profile.phone if self.profile is not None else None
