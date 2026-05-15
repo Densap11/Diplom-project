@@ -1,5 +1,8 @@
 # Backend
 
+[![CI](https://github.com/Densap11/Diplom-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Densap11/Diplom-project/actions/workflows/ci.yml)
+[![Docker Smoke](https://github.com/Densap11/Diplom-project/actions/workflows/docker-smoke.yml/badge.svg)](https://github.com/Densap11/Diplom-project/actions/workflows/docker-smoke.yml)
+
 Backend-сервис на FastAPI для агрегации внеучебной активности университета.
 
 ## Структура базы данных

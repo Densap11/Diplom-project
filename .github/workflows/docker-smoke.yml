@@ -1,0 +1,96 @@
+name: Docker Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  compose-smoke:
+    name: Compose build, migrations and healthcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare CI environment file
+        run: |
+          cp .env.example .env
+          {
+            echo "SECRET_KEY=ci-secret-key-for-github-actions"
+            echo "POSTGRES_PASSWORD=postgres"
+            echo "CORS_ORIGINS=http://localhost:3000"
+            echo "FIRST_ADMIN_EMAIL=admin@campus-demo.ru"
+            echo "FIRST_ADMIN_PASSWORD=password123"
+            echo "FIRST_ADMIN_FULL_NAME=Администратор"
+          } >> .env
+
+      - name: Validate compose config
+        run: docker compose config
+
+      - name: Build and start stack
+        run: docker compose up -d --build
+
+      - name: Wait for healthy services
+        run: |
+          for attempt in $(seq 1 30); do
+            unhealthy="$(
+              docker compose ps --format json | python3 -c '
+import json
+import sys
+
+rows = [json.loads(line) for line in sys.stdin if line.strip()]
+bad = []
+for row in rows:
+    service = row["Service"]
+    state = row.get("State", "")
+    health = row.get("Health", "")
+    if health:
+        if health != "healthy":
+            bad.append(f"{service}:{health}")
+    elif state != "running":
+        bad.append(f"{service}:{state}")
+print("\n".join(bad))
+'
+            )"
+            docker compose ps
+            if [ -z "$unhealthy" ]; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose logs --tail 200
+          exit 1
+
+      - name: Check Alembic head
+        run: docker compose exec -T backend alembic current | grep "20260515_0004"
+
+      - name: Seed first administrator
+        run: docker compose exec -T backend python -m app.scripts.seed_admin
+
+      - name: Check backend health endpoint
+        run: curl --fail http://localhost:8000/api/v1/health
+
+      - name: Check frontend homepage
+        run: curl --fail http://localhost:3000
+
+      - name: Run tests inside backend image
+        run: docker compose exec -T backend python -m pytest -q
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --tail 200
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
