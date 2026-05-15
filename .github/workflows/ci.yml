@@ -1,5 +1,8 @@
 name: CI
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -63,4 +66,3 @@ jobs:
 
       - name: Check for whitespace errors
         run: git diff --check HEAD
-
